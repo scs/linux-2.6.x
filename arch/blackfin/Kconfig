@@ -223,6 +223,7 @@ endchoice
 
 config SMP
 	depends on BF561
+	select GENERIC_TIME
 	bool "Symmetric multi-processing support"
 	---help---
 	  This enables support for systems with more than one CPU,
@@ -601,6 +602,7 @@ source kernel/Kconfig.hz
 
 config GENERIC_TIME
 	bool "Generic time"
+	depends on !IPIPE
 	default y
 
 config GENERIC_CLOCKEVENTS

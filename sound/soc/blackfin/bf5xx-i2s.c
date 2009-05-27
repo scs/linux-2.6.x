@@ -185,6 +185,12 @@ static int bf5xx_i2s_hw_params(struct snd_pcm_substream *substream,
 	return 0;
 }
 
+static void bf5xx_i2s_shutdown(struct snd_pcm_substream *substream)
+{
+	pr_debug("%s enter\n", __func__);
+	bf5xx_i2s.configured = 0;
+}
+
 static int bf5xx_i2s_probe(struct platform_device *pdev,
 			   struct snd_soc_dai *dai)
 {
@@ -291,6 +297,7 @@ struct snd_soc_dai bf5xx_i2s_dai = {
 		.rates = BF5XX_I2S_RATES,
 		.formats = BF5XX_I2S_FORMATS,},
 	.ops = {
+		.shutdown  = bf5xx_i2s_shutdown,
 		.hw_params = bf5xx_i2s_hw_params,},
 	.dai_ops = {
 		.set_fmt = bf5xx_i2s_set_dai_fmt,

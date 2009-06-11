@@ -1224,7 +1224,7 @@ __attribute__((l1_text))
 asmlinkage int __ipipe_grab_irq(int vec, struct pt_regs *regs)
 {
 	struct ipipe_percpu_domain_data *p = ipipe_root_cpudom_ptr();
-	struct ipipe_domain *this_domain = ipipe_current_domain;
+	struct ipipe_domain *this_domain = __ipipe_current_domain;
 	struct ivgx *ivg_stop = ivg7_13[vec-IVG7].istop;
 	struct ivgx *ivg = ivg7_13[vec-IVG7].ifirst;
 	int irq, s;

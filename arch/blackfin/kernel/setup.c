@@ -829,13 +829,7 @@ void __init setup_arch(char **cmdline_p)
 
 	printk(KERN_INFO "Boot Mode: %i\n", bfin_read_SYSCR() & 0xF);
 
-	/* Newer parts mirror SWRST bits in SYSCR */
-#if defined(CONFIG_BF53x) || defined(CONFIG_BF561) || \
-    defined(CONFIG_BF538) || defined(CONFIG_BF539)
 	_bfin_swrst = bfin_read_SWRST();
-#else
-	_bfin_swrst = bfin_read_SYSCR();
-#endif
 
 #ifdef CONFIG_DEBUG_DOUBLEFAULT_PRINT
 	bfin_write_SWRST(_bfin_swrst & ~DOUBLE_FAULT);
@@ -843,6 +837,12 @@ void __init setup_arch(char **cmdline_p)
 #ifdef CONFIG_DEBUG_DOUBLEFAULT_RESET
 	bfin_write_SWRST(_bfin_swrst | DOUBLE_FAULT);
 #endif
+	/* Newer parts mirror SWRST bits in SYSCR */
+#if !(defined(CONFIG_BF53x) || defined(CONFIG_BF561) || \
+    defined(CONFIG_BF538) || defined(CONFIG_BF539))
+	_bfin_swrst = bfin_read_SYSCR();
+#endif
+
 
 #ifdef CONFIG_SMP
 	if (_bfin_swrst & SWRST_DBL_FAULT_A) {

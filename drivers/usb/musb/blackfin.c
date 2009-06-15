@@ -94,9 +94,9 @@ void musb_write_fifo(struct musb_hw_ep *hw_ep, u16 len, const u8 *src)
 void musb_read_fifo(struct musb_hw_ep *hw_ep, u16 len, u8 *dst)
 {
 	void __iomem *fifo = hw_ep->fifo;
-#if defined(CONFIG_MUSB_DMA_POLL)
-        u8 epnum = hw_ep->epnum;
-        u16 dma_reg = 0;
+#if defined(CONFIG_MUSB_DMA_POLL) || ANOMALY_05000467
+	u8 epnum = hw_ep->epnum;
+	u16 dma_reg = 0;
 
 	invalidate_dcache_range((unsigned int)dst,
 		(unsigned int)(dst + len));
@@ -266,8 +266,9 @@ int musb_platform_get_vbus_status(struct musb *musb)
 	return 0;
 }
 
-void musb_platform_set_mode(struct musb *musb, u8 musb_mode)
+int musb_platform_set_mode(struct musb *musb, u8 musb_mode)
 {
+	return -EIO;
 }
 
 int __init musb_platform_init(struct musb *musb)

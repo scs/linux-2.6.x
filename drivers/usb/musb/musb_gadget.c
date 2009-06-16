@@ -302,8 +302,12 @@ static void txstate(struct musb *musb, struct musb_request *req)
 			size_t request_size;
 
 			/* setup DMA, then program endpoint CSR */
-			request_size = min(request->length,
-						musb_ep->dma->max_len);
+#ifdef USE_MODE1
+                        request_size = min(request->length,
+                                musb_ep->dma->max_len);
+#else
+                        request_size = fifo_count;
+#endif
 			if (request_size <= musb_ep->packet_sz)
 				musb_ep->dma->desired_mode = 0;
 			else

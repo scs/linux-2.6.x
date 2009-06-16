@@ -178,6 +178,8 @@
 #define ANOMALY_05000450 (1)
 /* USB Receive Interrupt Is Not Generated in DMA Mode 1 */
 #define ANOMALY_05000456 (__SILICON_REVISION__ < 3)
+/* USB DMA Mode 1 failure when multiple USB DMA channels are concurrently enabled */
+#define ANOMALY_05000460 (1)
 /* False Hardware Error when RETI points to invalid memory */
 #define ANOMALY_05000461 (1)
 /* USB Rx DMA hang */

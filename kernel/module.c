@@ -1014,7 +1014,7 @@ static inline int check_modstruct_version(Elf_Shdr *sechdrs,
 
 	if (IS_ERR_VALUE(find_symbol("_struct_module", NULL, &crc, true, false)))
 		BUG();
-	return check_version(sechdrs, versindex, "_struct_module", mod, crc);
+	return check_version(sechdrs, versindex, "struct_module", mod, crc);
 }
 
 /* First part is kernel version, which we ignore if module has crcs. */

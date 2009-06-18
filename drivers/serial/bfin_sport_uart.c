@@ -80,7 +80,7 @@ static inline void tx_one_byte(struct sport_uart_port *up, unsigned int value)
 	SPORT_PUT_TX(up, value);
 }
 
-static unsigned char rx_one_byte(struct sport_uart_port *up)
+static inline unsigned char rx_one_byte(struct sport_uart_port *up)
 {
 	unsigned int value;
 	unsigned char extract;

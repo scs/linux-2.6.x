@@ -153,6 +153,8 @@ static void enqueue_cmd(struct snd_ac97 *ac97, __u16 addr, __u16 data)
 	nextwrite[cmd_count[nextfrag]].ac97_addr = addr;
 	nextwrite[cmd_count[nextfrag]].ac97_data = data;
 	++cmd_count[nextfrag];
+        if (cmd_count[nextfrag] >= sport->tx_fragsize/sizeof(struct ac97_frame))
+            cmd_count[nextfrag] = 0;
 	pr_debug("ac97_sport: Inserting %02x/%04x into fragment %d\n",
 			addr >> 8, data, nextfrag);
 }

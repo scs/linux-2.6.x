@@ -166,12 +166,35 @@ static int sport_start(struct sport_device *sport)
 
 static int sport_stop(struct sport_device *sport)
 {
+	unsigned long flags;
+	u16 dummy, stat;
+
 	sport->regs->tcr1 &= ~TSPEN;
 	sport->regs->rcr1 &= ~RSPEN;
 	SSYNC();
 
 	disable_dma(sport->dma_rx_chan);
 	disable_dma(sport->dma_tx_chan);
+	/* sent out remaining data in TX fifo */
+	SSYNC();
+	local_irq_save(flags);
+	sport->regs->rcr1 |= RSPEN;
+	sport->regs->tcr1 |= TSPEN;
+	SSYNC();
+	stat = sport->regs->stat;
+	while (!(stat & TUVF)) {
+		if (stat & RXNE)
+			dummy = sport->regs->rx;
+		stat = sport->regs->stat;
+	}
+	sport->regs->tcr1 &= ~TSPEN;
+	sport->regs->rcr1 &= ~RSPEN;
+	SSYNC();
+	local_irq_restore(flags);
+	stat = get_dma_curr_irqstat(sport->dma_tx_chan);
+	if (stat & (DMA_DONE  | DMA_ERR))
+		clear_dma_irqstat(sport->dma_tx_chan);
+
 	return 0;
 }
 
@@ -356,6 +379,9 @@ EXPORT_SYMBOL(sport_tx_start);
 
 int sport_tx_stop(struct sport_device *sport)
 {
+	struct dmasg *desc;
+	unsigned long flags;
+
 	if (!sport->tx_run)
 		return 0;
 	if (sport->rx_run) {
@@ -363,11 +389,17 @@ int sport_tx_stop(struct sport_device *sport)
 		sport_hook_tx_dummy(sport);
 	} else {
 		/* Both rx and tx dma stopped */
+		local_irq_save(flags);
+		desc = (struct dmasg *)get_dma_next_desc_ptr(sport->dma_tx_chan);
+		memset((char *)desc->start_addr, 0, sport->tx_fragsize);
+		local_irq_restore(flags);
+		while ((unsigned long)(get_dma_curr_desc_ptr(sport->dma_tx_chan) -\
+			sizeof(struct dmasg)) != (unsigned long)desc)
+			continue;
 		sport_stop(sport);
 		sport->curr_rx_desc = NULL;
 		sport->curr_tx_desc = NULL;
 	}
-
 	sport->tx_run = 0;
 
 	return 0;

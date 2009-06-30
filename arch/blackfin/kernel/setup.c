@@ -101,7 +101,7 @@ void __cpuinit bfin_setup_caches(unsigned int cpu)
 	bfin_icache_init(icplb_tbl[cpu]);
 #endif
 
-#if defined(CONFIG_BFIN_DCACHE)
+#ifdef CONFIG_BFIN_DCACHE
 	bfin_dcache_init(dcplb_tbl[cpu]);
 #endif
 

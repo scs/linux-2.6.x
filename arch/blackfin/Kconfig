@@ -962,6 +962,7 @@ config BFIN_WT
 endchoice
 
 config BFIN_L2_DCACHE
+	depends on BFIN_DCACHE
 	depends on (BF54x || BF561) && !SMP
 	bool "Enable L2 DCACHE"
 choice

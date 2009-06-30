@@ -90,7 +90,7 @@ do { memcpy(dst, src, len);						\
 
 #define copy_from_user_page(vma, page, vaddr, dst, src, len)	memcpy(dst, src, len)
 
-#if defined(CONFIG_BFIN_DCACHE) || defined(CONFIG_BFIN_L2_DCACHE)
+#if defined(CONFIG_BFIN_DCACHE)
 # define invalidate_dcache_range(start,end)	blackfin_dcache_invalidate_range((start), (end))
 #else
 # define invalidate_dcache_range(start,end)	do { } while (0)

@@ -1,7 +1,6 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.28.10
-# Thu May 21 05:50:01 2009
 #
 # CONFIG_MMU is not set
 # CONFIG_FPU is not set
@@ -693,15 +692,12 @@ CONFIG_INPUT_EVDEV=m
 # CONFIG_INPUT_TOUCHSCREEN is not set
 CONFIG_INPUT_MISC=y
 # CONFIG_INPUT_UINPUT is not set
-CONFIG_CONFIG_INPUT_PCF8574=m
+CONFIG_INPUT_PCF8574=m
 
 #
 # Hardware I/O ports
 #
-CONFIG_SERIO=y
-CONFIG_SERIO_SERPORT=y
-CONFIG_SERIO_LIBPS2=y
-# CONFIG_SERIO_RAW is not set
+# CONFIG_SERIO is not set
 # CONFIG_GAMEPORT is not set
 
 #

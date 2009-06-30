@@ -83,7 +83,7 @@ DEFINE_PER_CPU(struct blackfin_cpudata, cpu_data);
 
 static int early_init_clkin_hz(char *buf);
 
-#if defined(CONFIG_BFIN_DCACHE) || defined(CONFIG_BFIN_ICACHE)
+#if defined(CONFIG_BFIN_DCACHE) || defined(CONFIG_BFIN_ICACHE) || defined(CONFIG_BFIN_L2_DCACHE)
 void __init generate_cplb_tables(void)
 {
 	unsigned int cpu;
@@ -101,7 +101,7 @@ void __cpuinit bfin_setup_caches(unsigned int cpu)
 	bfin_icache_init(icplb_tbl[cpu]);
 #endif
 
-#ifdef CONFIG_BFIN_DCACHE
+#if defined(CONFIG_BFIN_DCACHE) || defined(CONFIG_BFIN_L2_DCACHE)
 	bfin_dcache_init(dcplb_tbl[cpu]);
 #endif
 
@@ -123,6 +123,15 @@ void __cpuinit bfin_setup_caches(unsigned int cpu)
 # endif
 		"\n", cpu);
 #endif
+#ifdef CONFIG_BFIN_L2_DCACHE
+	printk(KERN_INFO "Data Cache (L2 SRAM) Enabled"
+# if defined CONFIG_BFIN_WB
+		" (write-back)"
+# elif defined CONFIG_BFIN_WT
+		" (write-through)"
+# endif
+		"\n");
+#endif
 }
 
 void __cpuinit bfin_setup_cpudata(unsigned int cpu)
@@ -137,7 +146,7 @@ void __cpuinit bfin_setup_cpudata(unsigned int cpu)
 
 void __init bfin_cache_init(void)
 {
-#if defined(CONFIG_BFIN_DCACHE) || defined(CONFIG_BFIN_ICACHE)
+#if defined(CONFIG_BFIN_DCACHE) || defined(CONFIG_BFIN_ICACHE) || defined(CONFIG_BFIN_L2_DCACHE)
 	generate_cplb_tables();
 #endif
 	bfin_setup_caches(0);

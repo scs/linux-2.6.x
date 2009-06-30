@@ -42,7 +42,7 @@ void __cpuinit bfin_icache_init(struct cplb_entry *icplb_tbl)
 }
 #endif
 
-#if defined(CONFIG_BFIN_DCACHE)
+#if defined(CONFIG_BFIN_DCACHE) || defined(CONFIG_BFIN_L2_DCACHE)
 void __cpuinit bfin_dcache_init(struct cplb_entry *dcplb_tbl)
 {
 	unsigned long ctrl;

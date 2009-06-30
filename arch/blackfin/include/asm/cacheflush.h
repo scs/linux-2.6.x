@@ -55,7 +55,13 @@ extern void blackfin_invalidate_entire_icache(void);
 static inline void flush_icache_range(unsigned start, unsigned end)
 {
 #if defined(CONFIG_BFIN_WB)
-	blackfin_dcache_flush_range(start, end);
+	if (start >= 0x1000 && end <= physical_mem_end)
+		blackfin_dcache_flush_range(start, end);
+#endif
+
+#if defined(CONFIG_BFIN_L2_WB)
+	if (start >= L2_START && end <= L2_START + L2_LENGTH)
+		blackfin_dcache_flush_range(start, end);
 #endif
 
 	/* Make sure all write buffers in the data side of the core
@@ -67,9 +73,13 @@ static inline void flush_icache_range(unsigned start, unsigned end)
 	 * the pipeline.
 	 */
 	SSYNC();
+
 #if defined(CONFIG_BFIN_ICACHE)
-	blackfin_icache_flush_range(start, end);
-	flush_icache_range_others(start, end);
+	if ((start >= 0x1000 && end <= physical_mem_end) || (L2_LENGTH
+		&& start >= L2_START && end <= L2_START + L2_LENGTH)) {
+		blackfin_icache_flush_range(start, end);
+		flush_icache_range_others(start, end);
+	}
 #endif
 }
 
@@ -107,7 +117,7 @@ static inline int bfin_addr_dcachable(unsigned long addr)
 		addr >= _ramend && addr < physical_mem_end)
 		return 1;
 
-#ifndef CONFIG_BFIN_L2_NOT_CACHED
+#ifdef CONFIG_BFIN_L2_DCACHE
 	if (addr >= L2_START && addr < L2_START + L2_LENGTH)
 		return 1;
 #endif

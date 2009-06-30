@@ -68,14 +68,14 @@
 #define L2_ATTR          (INITIAL_T | SWITCH_T | I_CPLB | D_CPLB)
 #define L2_IMEMORY       (SDRAM_IGENERIC)
 
-# if defined(CONFIG_BFIN_L2_WB)
-# define L2_DMEMORY      (CPLB_L1_CHBL | CPLB_COMMON)
-# elif defined(CONFIG_BFIN_L2_WT)
-# define L2_DMEMORY      (CPLB_L1_CHBL | CPLB_WT | CPLB_L1_AOW  | CPLB_COMMON)
-# elif defined(CONFIG_BFIN_L2_NOT_CACHED)
-# define L2_DMEMORY      (CPLB_COMMON)
+# if defined(CONFIG_BFIN_L2_DCACHE)
+#  if defined(CONFIG_BFIN_L2_WB)
+#  define L2_DMEMORY      (CPLB_L1_CHBL | CPLB_COMMON)
+#  elif defined(CONFIG_BFIN_L2_WT)
+#  define L2_DMEMORY      (CPLB_L1_CHBL | CPLB_WT | CPLB_L1_AOW  | CPLB_COMMON)
+#  endif
 # else
-# define L2_DMEMORY      (0)
+# define L2_DMEMORY      (CPLB_COMMON)
 # endif
 #endif /* CONFIG_SMP */
 

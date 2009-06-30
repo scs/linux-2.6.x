@@ -961,20 +961,18 @@ config BFIN_WT
 
 endchoice
 
+config BFIN_L2_DCACHE
+	depends on (BF54x || BF561) && !SMP
+	bool "Enable L2 DCACHE"
 choice
 	prompt "L2 SRAM cache policy"
-	depends on (BF54x || BF561)
-	default BFIN_L2_WT
+	depends on BFIN_L2_DCACHE
+	default BFIN_L2_WB
 config BFIN_L2_WB
 	bool "Write back"
-	depends on !SMP
 
 config BFIN_L2_WT
 	bool "Write through"
-	depends on !SMP
-
-config BFIN_L2_NOT_CACHED
-	bool "Not cached"
 
 endchoice
 

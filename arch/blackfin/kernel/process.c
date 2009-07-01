@@ -372,6 +372,20 @@ int _access_ok(unsigned long addr, unsigned long size)
 	    && addr + size <= L2_START + L2_LENGTH)
 		return 1;
 #endif
+#if !defined(CONFIG_SMP) && defined(COREB_L1_CODE_START)
+	if (addr >= COREB_L1_CODE_START &&
+	    addr + size <= COREB_L1_CODE_START + COREB_L1_CODE_LENGTH)
+		return 1;
+	if (addr >= COREB_L1_SCRATCH_START &&
+	    addr + size <= COREB_L1_SCRATCH_START + L1_SCRATCH_LENGTH)
+		return 1;
+	if (addr >= COREB_L1_DATA_A_START &&
+	    addr + size <= COREB_L1_DATA_A_START + COREB_L1_DATA_A_LENGTH)
+		return 1;
+	if (addr >= COREB_L1_DATA_B_START &&
+	    addr + size <= COREB_L1_DATA_B_START + COREB_L1_DATA_B_LENGTH)
+		return 1;
+#endif
 	return 0;
 }
 EXPORT_SYMBOL(_access_ok);

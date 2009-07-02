@@ -521,6 +521,9 @@ static int sst_write(struct mtd_info *mtd, loff_t to, size_t len,
 		/* write one byte. */
 		t[1].len = 1;
 		spi_sync(flash->spi, &m);
+		ret = wait_till_ready(flash);
+		if (ret)
+			goto time_out;
 		*retlen += m.actual_length - CMD_SIZE;
 	}
 	to += actual;
@@ -536,17 +539,22 @@ static int sst_write(struct mtd_info *mtd, loff_t to, size_t len,
 		/* write two bytes. */
 		t[1].len = 2;
 		t[1].tx_buf = buf + actual;
+
+		spi_sync(flash->spi, &m);
 		ret = wait_till_ready(flash);
 		if (ret)
 			goto time_out;
-		spi_sync(flash->spi, &m);
-
 		*retlen += m.actual_length - cmd_sz;
 		cmd_sz = 1;
 		to += 2;
 	}
+	write_disable(flash);
+	ret = wait_till_ready(flash);
+	if (ret)
+		goto time_out;
 
 	if (actual != len) {
+		write_enable(flash);
 		flash->command[0] = OPCODE_BP;
 		flash->command[1] = to >> 16;
 		flash->command[2] = to >> 8;
@@ -554,17 +562,16 @@ static int sst_write(struct mtd_info *mtd, loff_t to, size_t len,
 		t[0].len = CMD_SIZE;
 		t[1].len = 1;
 		t[1].tx_buf = buf + actual;
+
+		spi_sync(flash->spi, &m);
 		ret = wait_till_ready(flash);
 		if (ret)
 			goto time_out;
-		spi_sync(flash->spi, &m);
-
 		*retlen += m.actual_length - CMD_SIZE;
+		write_disable(flash);
 	}
 
-	ret = wait_till_ready(flash);
 time_out:
-	write_disable(flash);
 	mutex_unlock(&flash->lock);
 	return ret;
 }

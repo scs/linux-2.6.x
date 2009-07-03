@@ -181,11 +181,11 @@ static int sport_stop(struct sport_device *sport)
 	sport->regs->rcr1 |= RSPEN;
 	sport->regs->tcr1 |= TSPEN;
 	SSYNC();
-	stat = sport->regs->stat;
+	stat = *(volatile u16 *)(&sport->regs->stat);
 	while (!(stat & TUVF)) {
 		if (stat & RXNE)
-			dummy = sport->regs->rx;
-		stat = sport->regs->stat;
+			dummy = *(volatile u16 *)(&sport->regs->rx);
+		stat = *(volatile u16 *)(&sport->regs->stat);
 	}
 	sport->regs->tcr1 &= ~TSPEN;
 	sport->regs->rcr1 &= ~RSPEN;
@@ -194,7 +194,6 @@ static int sport_stop(struct sport_device *sport)
 	stat = get_dma_curr_irqstat(sport->dma_tx_chan);
 	if (stat & (DMA_DONE  | DMA_ERR))
 		clear_dma_irqstat(sport->dma_tx_chan);
-
 	return 0;
 }
 

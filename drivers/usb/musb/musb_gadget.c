@@ -316,7 +316,7 @@ static void txstate(struct musb *musb, struct musb_request *req)
 			use_dma = use_dma && c->channel_program(
 					musb_ep->dma, musb_ep->packet_sz,
 					musb_ep->dma->desired_mode,
-					request->dma,
+					request->dma + request->actual,
 					(musb_ep->dma->desired_mode == 0)
 					? request_size
 					: (request_size -
@@ -512,7 +512,8 @@ void musb_g_tx(struct musb *musb, u8 epnum)
 							| MUSB_TXCSR_TXPKTRDY);
 					request->zero = 0;
 				}
-
+				if (request->actual < request->length)
+					break;
 				/* ... or if not, then complete it */
 				musb_g_giveback(musb_ep, request, 0);
 

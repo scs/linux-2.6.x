@@ -770,6 +770,8 @@ void __init setup_arch(char **cmdline_p)
 {
 	unsigned long sclk, cclk;
 
+	enable_shadow_console();
+
 #ifdef CONFIG_DUMMY_CONSOLE
 	conswitchp = &dummy_con;
 #endif

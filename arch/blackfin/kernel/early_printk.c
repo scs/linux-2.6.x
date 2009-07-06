@@ -1,5 +1,5 @@
 /*
- * File:         arch/blackfin/kernel/early_printk.c
+ * File:         arch/blackfin/kernel/shadow_console.c
  * Based on:     arch/x86_64/kernel/early_printk.c
  * Author:       Robin Getz <rgetz@blackfin.uclinux.org
  *

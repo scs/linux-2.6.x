@@ -395,7 +395,7 @@ asmlinkage void trap_c(struct pt_regs *fp)
 	/* 0x23 - Data CPLB protection violation, handled here */
 	case VEC_CPLB_VL:
 		info.si_code = ILL_CPLB_VI;
-		sig = SIGBUS;
+		sig = SIGSEGV;
 		verbose_printk(KERN_NOTICE EXC_0x23(KERN_NOTICE));
 		CHK_DEBUGGER_TRAP_MAYBE();
 		break;

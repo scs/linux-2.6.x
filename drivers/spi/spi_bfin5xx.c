@@ -522,7 +522,7 @@ static void bfin_spi_giveback(struct driver_data *drv_data)
 
 	msg->state = NULL;
 
-	if (!drv_data->cs_change)
+	if (!drv_data->cs_change && drv_data->tx_dma != 0xFFFF)
 		bfin_spi_cs_deactive(drv_data, chip);
 
 	/* Not stop spi in autobuffer mode */

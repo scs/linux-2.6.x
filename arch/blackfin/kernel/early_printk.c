@@ -256,6 +256,7 @@ asmlinkage void __init early_trap_c(struct pt_regs *fp, void *retaddr)
 				early_shadow_reg(bfin_read_TBUF(), 32);
 				early_shadow_puts("\n S :");
 				early_shadow_reg(bfin_read_TBUF(), 32);
+			}
 		}
 #endif
 		early_shadow_puts("\nUse bfin-elf-addr2line to determine "

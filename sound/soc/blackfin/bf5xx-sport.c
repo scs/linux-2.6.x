@@ -166,17 +166,20 @@ static int sport_start(struct sport_device *sport)
 
 static int sport_stop(struct sport_device *sport)
 {
-	unsigned long flags;
-	u16 dummy, stat;
-
 	sport->regs->tcr1 &= ~TSPEN;
 	sport->regs->rcr1 &= ~RSPEN;
 	SSYNC();
 
 	disable_dma(sport->dma_rx_chan);
 	disable_dma(sport->dma_tx_chan);
-	/* sent out remaining data in TX fifo */
 	SSYNC();
+#ifdef CONFIG_SND_BF5XX_AC97
+	unsigned long flags;
+	u16 dummy, stat;
+	/* Send out remaining data in TX fifo.The remaining data
+	 * only affects ac97 mode obviously,and may not work for
+	 * other audio interfaces due to lack sync signal.
+	 */
 	local_irq_save(flags);
 	sport->regs->rcr1 |= RSPEN;
 	sport->regs->tcr1 |= TSPEN;
@@ -194,6 +197,7 @@ static int sport_stop(struct sport_device *sport)
 	stat = get_dma_curr_irqstat(sport->dma_tx_chan);
 	if (stat & (DMA_DONE  | DMA_ERR))
 		clear_dma_irqstat(sport->dma_tx_chan);
+#endif
 	return 0;
 }
 
@@ -378,9 +382,6 @@ EXPORT_SYMBOL(sport_tx_start);
 
 int sport_tx_stop(struct sport_device *sport)
 {
-	struct dmasg *desc;
-	unsigned long flags;
-
 	if (!sport->tx_run)
 		return 0;
 	if (sport->rx_run) {
@@ -388,6 +389,10 @@ int sport_tx_stop(struct sport_device *sport)
 		sport_hook_tx_dummy(sport);
 	} else {
 		/* Both rx and tx dma stopped */
+#ifdef CONFIG_SND_BF5XX_AC97
+		struct dmasg *desc;
+		unsigned long flags;
+
 		local_irq_save(flags);
 		desc = (struct dmasg *)get_dma_next_desc_ptr(sport->dma_tx_chan);
 		memset((char *)desc->start_addr, 0, sport->tx_fragsize);
@@ -395,6 +400,7 @@ int sport_tx_stop(struct sport_device *sport)
 		while ((unsigned long)(get_dma_curr_desc_ptr(sport->dma_tx_chan) -\
 			sizeof(struct dmasg)) != (unsigned long)desc)
 			continue;
+#endif
 		sport_stop(sport);
 		sport->curr_rx_desc = NULL;
 		sport->curr_tx_desc = NULL;

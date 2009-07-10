@@ -62,6 +62,7 @@
 #include <linux/libata.h>
 #include <asm/byteorder.h>
 #include <linux/cdrom.h>
+#include <linux/irq.h>
 
 #include "libata.h"
 
@@ -5870,7 +5871,9 @@ void ata_host_init(struct ata_host *host, struct device *dev,
 int ata_host_register(struct ata_host *host, struct scsi_host_template *sht)
 {
 	int i, rc;
+	struct irq_desc *desc;
 
+	desc = (host->irq > 0) ? irq_to_desc(host->irq) : NULL;
 	/* host must have been started */
 	if (!(host->flags & ATA_HOST_STARTED)) {
 		dev_printk(KERN_ERR, host->dev,
@@ -5931,6 +5934,10 @@ int ata_host_register(struct ata_host *host, struct scsi_host_template *sht)
 	for (i = 0; i < host->n_ports; i++) {
 		struct ata_port *ap = host->ports[i];
 
+		/* to workaround the hardware interrupt issue, use polling for probe */
+		if (host->irq && (desc->status & IRQ_NOAUTOEN))
+			ap->flags |= ATA_FLAG_PIO_POLLING;
+
 		/* probe */
 		if (ap->ops->error_handler) {
 			struct ata_eh_info *ehi = &ap->link.eh_info;
@@ -5967,10 +5974,14 @@ int ata_host_register(struct ata_host *host, struct scsi_host_template *sht)
 				 */
 			}
 		}
+
+		/* restore to irq mode for data transfer */
+		if (host->irq && (desc->status & IRQ_NOAUTOEN))
+			ap->flags &= ~ATA_FLAG_PIO_POLLING;
 	}
 
 	/* enable irq after probe if it is asked to be disabled when request*/
-	if (host->irq_flags & IRQF_DISABLED)
+	if (host->irq && (desc->status & IRQ_NOAUTOEN))
 		enable_irq(host->irq);
 
 	/* probes are done, now scan each port's disk(s) */

@@ -51,8 +51,13 @@ config SND_BF5XX_MMAP_SUPPORT
 	depends on SND_BF5XX_AC97
 	default y
 	help
-	  Say y if you want AC97 driver to support mmap mode.
+	  Say y if you want AC97 driver to support mmap mode
 	  We introduce an intermediate buffer to simulate mmap.
+
+          Note:
+          if you want to run oss-based applications,this option
+          should not be selected,for the slow copy memory job
+          may cause underrun.
 
 config SND_BF5XX_MULTICHAN_SUPPORT
 	bool "Enable Multichannel Support"

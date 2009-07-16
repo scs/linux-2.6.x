@@ -645,12 +645,12 @@ static bool get_instruction(unsigned short *val, unsigned short *address)
 #endif
 	    (addr >= BOOT_ROM_START && (addr + 2) <= (BOOT_ROM_START + BOOT_ROM_LENGTH)) ||
 #if L1_DATA_A_LENGTH != 0
-	    (addr >= L1_DATA_A_START && (addr + 2) <= (L1_DATA_A_START + L1_DATA_A_LENGTH)) ||
+	    (addr >= get_l1_data_a_start() && (addr + 2) <= (get_l1_data_a_start() + L1_DATA_A_LENGTH)) ||
 #endif
 #if L1_DATA_B_LENGTH != 0
-	    (addr >= L1_DATA_B_START && (addr + 2) <= (L1_DATA_B_START + L1_DATA_B_LENGTH)) ||
+	    (addr >= get_l1_data_b_start() && (addr + 2) <= (get_l1_data_b_start() + L1_DATA_B_LENGTH)) ||
 #endif
-	    (addr >= L1_SCRATCH_START && (addr + 2) <= (L1_SCRATCH_START + L1_SCRATCH_LENGTH)) ||
+	    (addr >= get_l1_scratch_start() && (addr + 2) <= (get_l1_scratch_start() + L1_SCRATCH_LENGTH)) ||
 	    (!(bfin_read_EBIU_AMBCTL0() & B0RDYEN) &&
 	       addr >= ASYNC_BANK0_BASE && (addr + 2) <= (ASYNC_BANK0_BASE + ASYNC_BANK0_SIZE)) ||
 	    (!(bfin_read_EBIU_AMBCTL0() & B1RDYEN) &&
@@ -664,7 +664,7 @@ static bool get_instruction(unsigned short *val, unsigned short *address)
 	}
 
 #if L1_CODE_LENGTH != 0
-	if (addr >= L1_CODE_START && (addr + 2) <= (L1_CODE_START + L1_CODE_LENGTH)) {
+	if (addr >= get_l1_code_start() && (addr + 2) <= (get_l1_code_start() + L1_CODE_LENGTH)) {
 		isram_memcpy(val, address, 2);
 		return true;
 	}

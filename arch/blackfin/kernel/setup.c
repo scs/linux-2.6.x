@@ -125,9 +125,9 @@ void __cpuinit bfin_setup_caches(unsigned int cpu)
 #endif
 #ifdef CONFIG_BFIN_L2_DCACHE
 	printk(KERN_INFO "Data Cache (L2 SRAM) Enabled"
-# if defined CONFIG_BFIN_WB
+# if defined CONFIG_BFIN_L2_WB
 		" (write-back)"
-# elif defined CONFIG_BFIN_WT
+# elif defined CONFIG_BFIN_L2_WT
 		" (write-through)"
 # endif
 		"\n");

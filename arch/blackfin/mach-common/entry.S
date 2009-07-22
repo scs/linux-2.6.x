@@ -416,6 +416,22 @@ _double_fault:
 ENDPROC(_double_fault)
 
 ENTRY(_exception_to_level5)
+	/*
+	 * The call of SAVE_ALL_SYS may cause cplb exceptions,
+	 * the seqstat then be changed, so we save the seqstat to pda.
+	 */
+	EX_SCRATCH_REG = sp;
+	GET_PDA_SAFE(sp);
+	sp = [sp + PDA_EXSTACK];
+	[--sp] = (r7:7,p5:5);
+
+	GET_PDA(p5, r7);
+	r7 = SEQSTAT;
+	[p5 + PDA_SEQSTAT_L5] = r7;
+
+	(r7:7,p5:5) = [sp++];
+	sp = EX_SCRATCH_REG;
+
 	SAVE_ALL_SYS
 
 	GET_PDA(p4, r7);        /* Fetch current PDA */
@@ -424,6 +440,9 @@ ENTRY(_exception_to_level5)
 
 	r6 = [p4 + PDA_SYSCFG];
 	[sp + PT_SYSCFG] = r6;
+
+	r6 = [p4 + PDA_SEQSTAT_L5]; /* Read back the seqstat */
+	[sp + PT_SEQSTAT] = r6;
 
 	/* Restore interrupt mask.  We haven't pushed RETI, so this
 	 * doesn't enable interrupts until we return from this handler.  */
@@ -472,7 +491,7 @@ ENTRY(_trap) /* Exception: 4th entry into system event table(supervisor mode)*/
 	 */
 	EX_SCRATCH_REG = sp;
 	GET_PDA_SAFE(sp);
-	sp = [sp + PDA_EXSTACK]
+	sp = [sp + PDA_EXSTACK];
 	/* Try to deal with syscalls quickly.  */
 	[--sp] = ASTAT;
 	[--sp] = (R7:6,P5:4);

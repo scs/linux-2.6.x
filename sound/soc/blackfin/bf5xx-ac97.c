@@ -41,6 +41,7 @@
 */
 
 static int *cmd_count;
+static u16 *reg_cache;
 static int sport_num = CONFIG_SND_BF5XX_SPORT_NUM;
 
 #define SPORT_REQ(x) \
@@ -267,6 +268,16 @@ static int bf5xx_ac97_suspend(struct platform_device *pdev,
 		sport_rx_stop(sport);
 	if (dai->playback.active)
 		sport_tx_stop(sport);
+#ifdef CONFIG_SND_BF5XX_HAVE_COLD_RESET
+	/* Restore things there */
+	reg_cache[AC97_MASTER >> 1] = bf5xx_ac97_read(NULL, AC97_MASTER);
+	reg_cache[AC97_PCM >> 1] = bf5xx_ac97_read(NULL, AC97_PCM);
+	reg_cache[AC97_REC_GAIN >> 1] = bf5xx_ac97_read(NULL, AC97_REC_GAIN);
+	reg_cache[AC97_CENTER_LFE_MASTER >> 1] = bf5xx_ac97_read(NULL,
+						AC97_CENTER_LFE_MASTER);
+	reg_cache[AC97_SURROUND_MASTER >> 1] = bf5xx_ac97_read(NULL,
+						AC97_SURROUND_MASTER);
+#endif
 	return 0;
 }
 
@@ -299,6 +310,26 @@ static int bf5xx_ac97_resume(struct platform_device *pdev,
 		return -EBUSY;
 	}
 
+#ifdef CONFIG_SND_BF5XX_HAVE_COLD_RESET
+	/*
+	 * The codec will be reset by the RESET GPIO,when
+	 * system is suspended to memory then resumes.So,
+	 * we need to restore the codec to the status before suspend.
+	 */
+	u16 ext_status;
+
+	bf5xx_ac97_write(NULL, AC97_AD_SERIAL_CFG, 0x9900);
+	bf5xx_ac97_write(NULL, AC97_MASTER, reg_cache[AC97_MASTER >> 1]);
+	bf5xx_ac97_write(NULL, AC97_PCM, reg_cache[AC97_PCM >> 1]);
+	bf5xx_ac97_write(NULL, AC97_REC_GAIN, reg_cache[AC97_REC_GAIN >> 1]);
+	bf5xx_ac97_write(NULL, AC97_CENTER_LFE_MASTER,
+				reg_cache[AC97_CENTER_LFE_MASTER >> 1]);
+	bf5xx_ac97_write(NULL, AC97_SURROUND_MASTER,
+				reg_cache[AC97_SURROUND_MASTER >> 1]);
+	/*power on LFE/CENTER/Surround DACs*/
+	ext_status = bf5xx_ac97_read(NULL, AC97_EXTENDED_STATUS);
+	bf5xx_ac97_write(NULL, AC97_EXTENDED_STATUS, ext_status & ~0x3800);
+#endif
 	return 0;
 }
 
@@ -322,6 +353,13 @@ static int bf5xx_ac97_probe(struct platform_device *pdev,
 	}
 
 #ifdef CONFIG_SND_BF5XX_HAVE_COLD_RESET
+#ifdef CONFIG_PM
+	reg_cache = kzalloc(sizeof(u16) * 0x80, GFP_KERNEL);
+	if (!reg_cache) {
+		ret = -ENOMEM;
+		goto no_memory;
+	}
+#endif
 	/* Request PB3 as reset pin */
 	if (gpio_request(CONFIG_SND_BF5XX_RESET_GPIO_NUM, "SND_AD198x RESET")) {
 		pr_err("Failed to request GPIO_%d for reset\n",
@@ -367,6 +405,10 @@ sport_err:
 #ifdef CONFIG_SND_BF5XX_HAVE_COLD_RESET
 	gpio_free(CONFIG_SND_BF5XX_RESET_GPIO_NUM);
 gpio_err:
+#ifdef CONFIG_PM
+	kfree(reg_cache);
+#endif
+no_memory:
 #endif
 	peripheral_free_list(sport_req[sport_num]);
 peripheral_err:

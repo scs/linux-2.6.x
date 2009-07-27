@@ -258,16 +258,13 @@ EXPORT_SYMBOL_GPL(soc_ac97_ops);
 static int bf5xx_ac97_suspend(struct platform_device *pdev,
 	struct snd_soc_dai *dai)
 {
-	struct sport_device *sport =
-		(struct sport_device *)dai->private_data;
 
 	pr_debug("%s : sport %d\n", __func__, dai->id);
-	if (!dai->active)
-		return 0;
+
 	if (dai->capture.active)
-		sport_rx_stop(sport);
+		sport_rx_stop(sport_handle);
 	if (dai->playback.active)
-		sport_tx_stop(sport);
+		sport_tx_stop(sport_handle);
 #ifdef CONFIG_SND_BF5XX_HAVE_COLD_RESET
 	/* Restore things there */
 	reg_cache[AC97_MASTER >> 1] = bf5xx_ac97_read(NULL, AC97_MASTER);
@@ -285,26 +282,22 @@ static int bf5xx_ac97_resume(struct platform_device *pdev,
 	struct snd_soc_dai *dai)
 {
 	int ret;
-	struct sport_device *sport =
-		(struct sport_device *)dai->private_data;
 
 	pr_debug("%s : sport %d\n", __func__, dai->id);
-	if (!dai->active)
-		return 0;
 
-	ret = sport_set_multichannel(sport, 16, 0x1F, 1);
+	ret = sport_set_multichannel(sport_handle, 16, 0x1F, 1);
 	if (ret) {
 		pr_err("SPORT is busy!\n");
 		return -EBUSY;
 	}
 
-	ret = sport_config_rx(sport, IRFS, 0xF, 0, (16*16-1));
+	ret = sport_config_rx(sport_handle, IRFS, 0xF, 0, (16*16-1));
 	if (ret) {
 		pr_err("SPORT is busy!\n");
 		return -EBUSY;
 	}
 
-	ret = sport_config_tx(sport, ITFS, 0xF, 0, (16*16-1));
+	ret = sport_config_tx(sport_handle, ITFS, 0xF, 0, (16*16-1));
 	if (ret) {
 		pr_err("SPORT is busy!\n");
 		return -EBUSY;

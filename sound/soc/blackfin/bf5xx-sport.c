@@ -173,7 +173,7 @@ static int sport_stop(struct sport_device *sport)
 	disable_dma(sport->dma_rx_chan);
 	disable_dma(sport->dma_tx_chan);
 	SSYNC();
-#ifdef CONFIG_SND_BF5XX_AC97
+#if (defined(CONFIG_SND_BF5XX_AC97) || defined(CONFIG_SND_BF5XX_AC97_MODULE))
 	unsigned long flags;
 	u16 dummy, stat;
 	/* Send out remaining data in TX fifo.The remaining data
@@ -389,7 +389,7 @@ int sport_tx_stop(struct sport_device *sport)
 		sport_hook_tx_dummy(sport);
 	} else {
 		/* Both rx and tx dma stopped */
-#ifdef CONFIG_SND_BF5XX_AC97
+#if (defined(CONFIG_SND_BF5XX_AC97) || defined(CONFIG_SND_BF5XX_AC97_MODULE))
 		struct dmasg *desc;
 		unsigned long flags;
 

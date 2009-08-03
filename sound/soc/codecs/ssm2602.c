@@ -599,8 +599,7 @@ static int ssm2602_init(struct snd_soc_device *socdev)
 	reg = ssm2602_read_reg_cache(codec, SSM2602_ROUT1V);
 	ssm2602_write(codec, SSM2602_ROUT1V, reg | ROUT1V_RLHP_BOTH);
 	/*select Line in as default input*/
-	ssm2602_write(codec, SSM2602_APANA,
-			APANA_ENABLE_MIC_BOOST2 | APANA_SELECT_DAC |
+	ssm2602_write(codec, SSM2602_APANA, APANA_SELECT_DAC |
 			APANA_ENABLE_MIC_BOOST);
 	ssm2602_write(codec, SSM2602_PWR, 0);
 

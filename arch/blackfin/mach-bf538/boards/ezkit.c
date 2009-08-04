@@ -542,7 +542,7 @@ static struct platform_device bfin_dpmc = {
 };
 
 #if defined(CONFIG_MTD_PHYSMAP) || defined(CONFIG_MTD_PHYSMAP_MODULE)
-static struct mtd_partition stamp_partitions[] = {
+static struct mtd_partition ezkit_partitions[] = {
 	{
 		.name       = "bootloader(nor)",
 		.size       = 0x40000,
@@ -552,6 +552,7 @@ static struct mtd_partition stamp_partitions[] = {
 		.size       = 0x180000,
 		.offset     = MTDPART_OFS_APPEND,
 	}, {
+#if defined(CONFIG_SMC91X) || defined(CONFIG_SMC91X_MODULE)
 		.name       = "file system(nor)",
 		.size       = 0x400000 - 0x40000 - 0x180000 - 0x10000,
 		.offset     = MTDPART_OFS_APPEND,
@@ -560,29 +561,43 @@ static struct mtd_partition stamp_partitions[] = {
 		.size       = MTDPART_SIZ_FULL,
 		.offset     = 0x3F0000,
 		.mask_flags = MTD_WRITEABLE,
+#else		
+		.name       = "file system(nor)",
+		.size       = 0x300000 - 0x40000 - 0x180000 - 0x10000,
+		.offset     = MTDPART_OFS_APPEND,
+	}, {
+		.name       = "MAC Address(nor)",
+		.size       = MTDPART_SIZ_FULL,
+		.offset     = 0x2F0000,
+		.mask_flags = MTD_WRITEABLE,
+#endif
 	}
 };
 
-static struct physmap_flash_data stamp_flash_data = {
+static struct physmap_flash_data ezkit_flash_data = {
 	.width      = 2,
-	.parts      = stamp_partitions,
-	.nr_parts   = ARRAY_SIZE(stamp_partitions),
+	.parts      = ezkit_partitions,
+	.nr_parts   = ARRAY_SIZE(ezkit_partitions),
 };
 
-static struct resource stamp_flash_resource = {
+static struct resource ezkit_flash_resource = {
 	.start = 0x20000000,
+#if defined(CONFIG_SMC91X) || defined(CONFIG_SMC91X_MODULE)
+	.end   = 0x202fffff,
+#else
 	.end   = 0x203fffff,
+#endif
 	.flags = IORESOURCE_MEM,
 };
 
-static struct platform_device stamp_flash_device = {
+static struct platform_device ezkit_flash_device = {
 	.name          = "physmap-flash",
 	.id            = 0,
 	.dev = {
-		.platform_data = &stamp_flash_data,
+		.platform_data = &ezkit_flash_data,
 	},
 	.num_resources = 1,
-	.resource      = &stamp_flash_resource,
+	.resource      = &ezkit_flash_resource,
 };
 #endif
 
@@ -636,7 +651,7 @@ static struct platform_device *cm_bf538_devices[] __initdata = {
 	&bfin_gpios_device,
 
 #if defined(CONFIG_MTD_PHYSMAP) || defined(CONFIG_MTD_PHYSMAP_MODULE)
-	&stamp_flash_device,
+	&ezkit_flash_device,
 #endif
 };
 

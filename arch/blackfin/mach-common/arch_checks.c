@@ -78,3 +78,8 @@
 	 (!defined(CONFIG_BFIN_DCACHE) && defined(CONFIG_BFIN_L2_WB)))
 # error You are exposing Anomaly 220 in this config, either config L2 as Write Through, or make External Memory WB.
 #endif
+
+/* If CPLB miss exception handler is not in L1, anomaly 05000402 will be hit - Execution of SSYNC before CPLB is enabled */
+#if ANOMALY_05000402 && !defined(CONFIG_EXCPT_IRQ_SYSC_L1)
+#error You are using a part with anomaly 05000402. Please enable CONFIG_EXCPT_IRQ_SYSC_L1.
+#endif

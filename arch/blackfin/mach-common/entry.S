@@ -379,8 +379,7 @@ _double_fault:
 
 	R5 = [P4];              /* Control Register*/
 	BITCLR(R5,ENICPLB_P);
-	SSYNC;          /* SSYNC required before writing to IMEM_CONTROL. */
-	.align 8;
+	CSYNC;          /* Disabling of CPLBs should be proceeded by a CSYNC */
 	[P4] = R5;
 	SSYNC;
 
@@ -388,8 +387,7 @@ _double_fault:
 	P4.H = HI(DMEM_CONTROL);
 	R5 = [P4];
 	BITCLR(R5,ENDCPLB_P);
-	SSYNC;          /* SSYNC required before writing to DMEM_CONTROL. */
-	.align 8;
+	CSYNC;          /* Disabling of CPLBs should be proceeded by a CSYNC */
 	[P4] = R5;
 	SSYNC;
 
@@ -1127,8 +1125,7 @@ ENTRY(_early_trap)
 	R5 = [P4];              /* Control Register*/
 	BITCLR(R5,ENICPLB_P);
 	CLI R1;
-	SSYNC;          /* SSYNC required before writing to IMEM_CONTROL. */
-	.align 8;
+	CSYNC;          /* Disabling of CPLBs should be proceeded by a CSYNC */
 	[P4] = R5;
 	SSYNC;
 
@@ -1136,8 +1133,7 @@ ENTRY(_early_trap)
 	P4.H = HI(DMEM_CONTROL);
 	R5 = [P4];
 	BITCLR(R5,ENDCPLB_P);
-	SSYNC;          /* SSYNC required before writing to DMEM_CONTROL. */
-	.align 8;
+	CSYNC;          /* Disabling of CPLBs should be proceeded by a CSYNC */
 	[P4] = R5;
 	SSYNC;
 	STI R1;

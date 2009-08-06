@@ -88,7 +88,8 @@
  * not work stably in host mode. This may be caused by anomaly 05000380.
  * So,either using silicon v0.2 or heighter or disabling DMA mode in musb.
  */
-#if ANOMALY_05000380 && defined(CONFIG_BF52x)
+#if ANOMALY_05000380 && defined(CONFIG_BF52x) && \
+	(defined(BF_REV_0_0) || defined(BF_REV_0_1))
 #error Please use PIO mode in MUSB driver on bf52x chip v0.0 and v0.1.
 #endif
 

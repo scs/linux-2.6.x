@@ -148,11 +148,6 @@ config MUSB_PIO_ONLY
 	  you can still disable it at run time using the "use_dma=n" module
 	  parameter.
 
-	  Note:
-		The Mentor usb DMA engine on BF52x(silicon v0.0 and v0.1)seems
-		not work stably in host mode.So,either using silicon v0.2 or
-		higher or disabling DMA when musb is in host mode.
-
 config MUSB_DMA_POLL
 	bool 'Using DMA polling in MUSB PIO mode'
 	depends on MUSB_PIO_ONLY && BLACKFIN

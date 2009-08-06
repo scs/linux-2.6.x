@@ -79,11 +79,6 @@
 # error You are exposing Anomaly 220 in this config, either config L2 as Write Through, or make External Memory WB.
 #endif
 
-/* If CPLB miss exception handler is not in L1, anomaly 05000402 will be hit - Execution of SSYNC before CPLB is enabled */
-#if ANOMALY_05000402 && !defined(CONFIG_EXCPT_IRQ_SYSC_L1)
-#error You are using a part with anomaly 05000402. Please enable CONFIG_EXCPT_IRQ_SYSC_L1.
-#endif
-
 /* The Mentor usb DMA engine on BF52x(silicon v0.0 and v0.1)seems
  * not work stably in host mode. This may be caused by anomaly 05000380.
  * After digging out the root cause anomaly, change its number  accordingly.

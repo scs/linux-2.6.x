@@ -83,3 +83,12 @@
 #if ANOMALY_05000402 && !defined(CONFIG_EXCPT_IRQ_SYSC_L1)
 #error You are using a part with anomaly 05000402. Please enable CONFIG_EXCPT_IRQ_SYSC_L1.
 #endif
+
+/* The Mentor usb DMA engine on BF52x(silicon v0.0 and v0.1)seems
+ * not work stably in host mode. This may be caused by anomaly 05000380.
+ * So,either using silicon v0.2 or heighter or disabling DMA mode in musb.
+ */
+#if ANOMALY_05000380 && defined(CONFIG_BF52x)
+#error Please use PIO mode in MUSB driver on bf52x chip v0.0 and v0.1.
+#endif
+

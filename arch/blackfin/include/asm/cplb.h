@@ -123,6 +123,7 @@
 #define FAULT_USERSUPV  (1 << 17)
 #define FAULT_CPLBBITS  0x0000ffff
 
+#ifndef __ASSEMBLY__
 static inline void disable_dcplb(void)
 {
 #ifdef CONFIG_BFIN_DCACHE
@@ -174,4 +175,5 @@ static inline void enable_icplb(void)
 	SSYNC();
 #endif
 }
-#endif				/* _CPLB_H */
+#endif		/* __ASSEMBLY__ */
+#endif		/* _CPLB_H */

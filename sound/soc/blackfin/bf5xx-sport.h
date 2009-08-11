@@ -35,6 +35,11 @@
 #include <linux/workqueue.h>
 #include <asm/dma.h>
 
+enum sport_bus_type {
+	SPORT_AC97 = 0,
+	SPORT_I2S,
+};
+
 struct sport_register {
 	u16 tcr1;	u16 reserved0;
 	u16 tcr2;	u16 reserved1;
@@ -126,6 +131,7 @@ struct sport_device {
 	int tx_delay_pos;
 	int once;
 #endif
+	enum sport_bus_type bus_type;
 	void *private_data;
 };
 

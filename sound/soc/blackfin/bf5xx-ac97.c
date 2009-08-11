@@ -372,6 +372,7 @@ static int bf5xx_ac97_probe(struct platform_device *pdev,
 		ret = -ENODEV;
 		goto sport_err;
 	}
+	sport_handle->bus_type = SPORT_AC97;
 	/*SPORT works in TDM mode to simulate AC97 transfers*/
 #if defined(CONFIG_SND_BF5XX_MULTICHAN_SUPPORT)
 	ret = sport_set_multichannel(sport_handle, 16, 0x3FF, 1);

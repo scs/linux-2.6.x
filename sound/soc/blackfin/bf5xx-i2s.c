@@ -207,7 +207,7 @@ static int bf5xx_i2s_probe(struct platform_device *pdev,
 		peripheral_free_list(&sport_req[sport_num][0]);
 		return -ENODEV;
 	}
-
+	sport_handle->bus_type = SPORT_I2S;
 	return 0;
 }
 

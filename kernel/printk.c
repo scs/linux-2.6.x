@@ -1213,7 +1213,6 @@ void register_console(struct console *newcon)
 		printk(" -> real [%s%d]\n", newcon->name, newcon->index);
 		for_each_console(bcon)
 			unregister_console(bcon);
-		newcon->flags &= ~CON_PRINTBUFFER;
 	} else {
 		printk(KERN_INFO "%sconsole [%s%d] enabled\n",
 			(newcon->flags & CON_BOOT) ? "boot" : "" ,

@@ -139,8 +139,8 @@ void musb_read_fifo(struct musb_hw_ep *hw_ep, u16 len, u8 *dst)
 				len & 0x01 ? (len >> 1) + 1 : len >> 1);
 		else
 			insw((unsigned long)fifo, dst,
-#endif				len & 0x01 ? (len >> 1) + 1 : len >> 1);
-
+				len & 0x01 ? (len >> 1) + 1 : len >> 1);
+#endif
 	DBG(4, "%cX ep%d fifo %p count %d buf %p\n",
 			'R', hw_ep->epnum, fifo, len, dst);
 

@@ -634,6 +634,10 @@ static bool get_instruction(unsigned short *val, unsigned short *address)
 	if (addr > (addr + 2))
 		return false;
 
+	/* check for valid memory */
+	if (!access_ok(VERIFY_READ, addr, 2) && !core_kernel_text(addr))
+		return false;
+
 	/*
 	 * Since we are in exception context, we need to do a little address checking
 	 * We need to make sure we are only accessing valid memory, and

@@ -1052,35 +1052,37 @@ int __init init_arch_irq(void)
 			set_irq_chained_handler(irq, bfin_demux_error_irq);
 			break;
 #endif
-#if defined(CONFIG_TICKSOURCE_GPTMR0)
-		case IRQ_TIMER0:
-			set_irq_handler(irq, handle_percpu_irq);
-			break;
-#endif
+
 #ifdef CONFIG_SMP
+#ifdef CONFIG_TICKSOURCE_GPTMR0
+		case IRQ_TIMER0:
+#endif
+#ifdef CONFIG_TICKSOURCE_CORETMR
+		case IRQ_CORETMR:
+#endif
 		case IRQ_SUPPLE_0:
 		case IRQ_SUPPLE_1:
 			set_irq_handler(irq, handle_percpu_irq);
 			break;
 #endif
-		default:
+
 #ifdef CONFIG_IPIPE
-			/*
-			 * We want internal interrupt sources to be
-			 * masked, because ISRs may trigger interrupts
-			 * recursively (e.g. DMA), but interrupts are
-			 * _not_ masked at CPU level. So let's handle
-			 * most of them as level interrupts, except
-			 * the timer interrupt which is special.
-			 */
-			if (irq == IRQ_SYSTMR || irq == IRQ_CORETMR)
-				set_irq_handler(irq, handle_simple_irq);
-			else
-				set_irq_handler(irq, handle_level_irq);
-#else /* !CONFIG_IPIPE */
+#ifndef CONFIG_TICKSOURCE_CORETMR
+		case IRQ_TIMER0:
 			set_irq_handler(irq, handle_simple_irq);
-#endif /* !CONFIG_IPIPE */
 			break;
+#endif
+		case IRQ_CORETMR:
+			set_irq_handler(irq, handle_simple_irq);
+			break;
+		default:
+			set_irq_handler(irq, handle_level_irq);
+			break;
+#else /* !CONFIG_IPIPE */
+		default:
+			set_irq_handler(irq, handle_simple_irq);
+			break;
+#endif /* !CONFIG_IPIPE */
 		}
 	}
 

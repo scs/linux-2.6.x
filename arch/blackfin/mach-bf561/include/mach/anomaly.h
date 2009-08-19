@@ -213,7 +213,11 @@
 /* Disabling Peripherals with DMA Running May Cause DMA System Instability */
 #define ANOMALY_05000278 (__SILICON_REVISION__ < 5)
 /* False Hardware Error Exception When ISR Context Is Not Restored */
-#define ANOMALY_05000281 (__SILICON_REVISION__ < 5)
+/* Temporarily walk around for bug 5421 till this issue is conformed by
+ * official anomaly document. It looks 05000281 still exists on bf561
+ * v0.5.
+ */
+#define ANOMALY_05000281 (__SILICON_REVISION__ <= 5)
 /* System MMR Write Is Stalled Indefinitely When Killed in a Particular Stage */
 #define ANOMALY_05000283 (1)
 /* A read will receive incorrect data under certain conditions */

@@ -49,7 +49,7 @@
 /*
  * Name the Board for the /proc/cpuinfo
  */
-const char bfin_board_name[] = "Bluetechnix CM BF537";
+const char bfin_board_name[] = "Bluetechnix CM BF537E";
 
 #if defined(CONFIG_SPI_BFIN) || defined(CONFIG_SPI_BFIN_MODULE)
 /* all SPI peripherals info goes here */
@@ -182,8 +182,13 @@ static struct resource bfin_spi0_resource[] = {
 	[1] = {
 		.start = CH_SPI,
 		.end   = CH_SPI,
+		.flags = IORESOURCE_DMA,
+	},
+	[2] = {
+		.start = IRQ_SPI,
+		.end   = IRQ_SPI,
 		.flags = IORESOURCE_IRQ,
-	}
+	},
 };
 
 /* SPI controller data */
@@ -218,6 +223,14 @@ static struct platform_device hitachi_fb_device = {
 #endif
 
 #if defined(CONFIG_SMC91X) || defined(CONFIG_SMC91X_MODULE)
+#include <linux/smc91x.h>
+
+static struct smc91x_platdata smc91x_info = {
+	.flags = SMC91X_USE_16BIT | SMC91X_NOWAIT,
+	.leda = RPC_LED_100_10,
+	.ledb = RPC_LED_TX_RX,
+};
+
 static struct resource smc91x_resources[] = {
 	{
 		.start = 0x20200300,
@@ -235,6 +248,9 @@ static struct platform_device smc91x_device = {
 	.id = 0,
 	.num_resources = ARRAY_SIZE(smc91x_resources),
 	.resource = smc91x_resources,
+	.dev	= {
+		.platform_data	= &smc91x_info,
+	},
 };
 #endif
 
@@ -280,12 +296,12 @@ static struct platform_device isp1362_hcd_device = {
 #if defined(CONFIG_USB_NET2272) || defined(CONFIG_USB_NET2272_MODULE)
 static struct resource net2272_bfin_resources[] = {
 	{
-		.start = 0x20200000,
-		.end = 0x20200000 + 0x100,
+		.start = 0x20300000,
+		.end = 0x20300000 + 0x100,
 		.flags = IORESOURCE_MEM,
 	}, {
-		.start = IRQ_PH14,
-		.end = IRQ_PH14,
+		.start = IRQ_PG13,
+		.end = IRQ_PG13,
 		.flags = IORESOURCE_IRQ | IORESOURCE_IRQ_HIGHLEVEL,
 	},
 };
@@ -319,11 +335,11 @@ static struct mtd_partition cm_partitions[] = {
 		.offset = 0,
 	}, {
 		.name   = "linux kernel(nor)",
-		.size   = 0xE0000,
+		.size   = 0x100000,
 		.offset = MTDPART_OFS_APPEND,
 	}, {
 		.name   = "file system(nor)",
-		.size   = MTDPART_SIZ_FULL,
+		.size   = 0x2C0000,
 		.offset = MTDPART_OFS_APPEND,
 	}
 };
@@ -543,7 +559,7 @@ static struct platform_device bfin_dpmc = {
 	},
 };
 
-static struct platform_device *cm_bf537_devices[] __initdata = {
+static struct platform_device *cm_bf537e_devices[] __initdata = {
 
 	&bfin_dpmc,
 
@@ -609,10 +625,10 @@ static struct platform_device *cm_bf537_devices[] __initdata = {
 	&bfin_gpios_device,
 };
 
-static int __init cm_bf537_init(void)
+static int __init cm_bf537e_init(void)
 {
 	printk(KERN_INFO "%s(): registering device resources\n", __func__);
-	platform_add_devices(cm_bf537_devices, ARRAY_SIZE(cm_bf537_devices));
+	platform_add_devices(cm_bf537e_devices, ARRAY_SIZE(cm_bf537e_devices));
 #if defined(CONFIG_SPI_BFIN) || defined(CONFIG_SPI_BFIN_MODULE)
 	spi_register_board_info(bfin_spi_board_info, ARRAY_SIZE(bfin_spi_board_info));
 #endif
@@ -623,7 +639,7 @@ static int __init cm_bf537_init(void)
 	return 0;
 }
 
-arch_initcall(cm_bf537_init);
+arch_initcall(cm_bf537e_init);
 
 void bfin_get_ether_addr(char *addr)
 {

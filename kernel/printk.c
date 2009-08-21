@@ -1204,6 +1204,15 @@ void register_console(struct console *newcon)
 		return;
 
 	/*
+	 * If we have a bootconsole, and are switching to a real console,
+	 * don't print everything out again, since when the boot console, and
+	 * the real console are the same physical device, it's annoying to
+	 * see the beginning boot messages twice
+	 */
+	if (bcon && ((newcon->flags & (CON_CONSDEV | CON_BOOT)) == CON_CONSDEV))
+		newcon->flags &= ~CON_PRINTBUFFER;
+
+	/*
 	 *	Put this console in the list - keep the
 	 *	preferred driver at the head of the list.
 	 */
@@ -1244,13 +1253,11 @@ void register_console(struct console *newcon)
 		for_each_console(bcon)
 			if (bcon->flags & CON_BOOT)
 				unregister_console(bcon);
-		newcon->flags &= ~CON_PRINTBUFFER;
 	} else {
 		printk(KERN_INFO "%sconsole [%s%d] enabled\n",
 			(newcon->flags & CON_BOOT) ? "boot" : "" ,
 			newcon->name, newcon->index);
 	}
-
 }
 EXPORT_SYMBOL(register_console);
 

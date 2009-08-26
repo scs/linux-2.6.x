@@ -61,6 +61,25 @@
     jump __common_int_entry;
 #else /* CONFIG_EXACT_HWERR is defined */
 
+/*
+ * Add workarounds for 283 and 315
+ * If needed, also make sure that 244 is also not caused,
+ * by adding 3 nops at the end, since the next instruction
+ * is going to be a SSYNC
+ */
+
+# if ANOMALY_05000283 || ANOMALY_05000315
+#  define ANOMALY_05000283_WORKAROUND(preg, dreg)	\
+	cc = dreg == dreg;				\
+	preg.h = HI(CHIPID);				\
+	preg.l = LO(CHIPID);				\
+	if cc jump 1f;					\
+	dreg.l = W[preg];				\
+1:	nop; nop; nop;
+#else
+#  define ANOMALY_05000283_WORKAROUND(preg, dreg)
+# endif /* ANOMALY_05000283 || ANOMALY_05000315 */
+
 /* if we want hardware error to be exact, we need to do a SSYNC (which forces
  * read/writes to complete to the memory controllers), and check to see that
  * caused a pending HW error condition. If so, we assume it was caused by user
@@ -75,8 +94,10 @@
     [--sp] = R0;	/*orig_r0*/					\
     [--sp] = (R7:0,P5:0);						\
     R1 = ASTAT;								\
+    ANOMALY_05000283_WORKAROUND(P0, R0)					\
     P0.L = LO(ILAT);							\
     P0.H = HI(ILAT);							\
+    SSYNC;								\
     SSYNC;								\
     R0 = [P0];								\
     CC = BITTST(R0, EVT_IVHW_P);					\
@@ -98,8 +119,10 @@
     [--sp] = R0;	/*orig_r0*/					\
     [--sp] = (R7:0,P5:0);						\
     R1 = ASTAT;								\
+    ANOMALY_05000283_WORKAROUND(P0, R0)					\
     P0.L = LO(ILAT);							\
     P0.H = HI(ILAT);							\
+    SSYNC;								\
     SSYNC;								\
     R0 = [P0];								\
     CC = BITTST(R0, EVT_IVHW_P);					\

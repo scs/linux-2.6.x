@@ -70,7 +70,7 @@ static void isram_write(const void *addr, uint64_t data)
 	if (addr >= (void *)(L1_CODE_START + L1_CODE_LENGTH))
 		return;
 
-	cmd = IADDR2DTEST(addr) | 1;             /* write */
+	cmd = IADDR2DTEST(addr) | 2;             /* write */
 
 	/*
 	 * Writes to DTEST_DATA[0:1] need to be atomic with write to DTEST_COMMAND

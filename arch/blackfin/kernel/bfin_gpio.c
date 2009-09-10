@@ -777,6 +777,8 @@ int peripheral_request(unsigned short per, const char *label)
 	unsigned long flags;
 	unsigned short ident = P_IDENT(per);
 
+	BUG_ON(ident >= MAX_BLACKFIN_GPIOS);
+
 	/*
 	 * Don't cares are pins with only one dedicated function
 	 */

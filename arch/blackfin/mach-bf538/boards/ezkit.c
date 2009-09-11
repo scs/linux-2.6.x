@@ -353,6 +353,11 @@ static struct resource bfin_spi0_resource[] = {
 	[1] = {
 		.start = CH_SPI0,
 		.end   = CH_SPI0,
+		.flags = IORESOURCE_DMA,
+	},
+	[2] = {
+		.start = IRQ_SPI0,
+		.end   = IRQ_SPI0,
 		.flags = IORESOURCE_IRQ,
 	}
 };
@@ -367,6 +372,11 @@ static struct resource bfin_spi1_resource[] = {
 	[1] = {
 		.start = CH_SPI1,
 		.end   = CH_SPI1,
+		.flags = IORESOURCE_DMA,
+	},
+	[2] = {
+		.start = IRQ_SPI1,
+		.end   = IRQ_SPI1,
 		.flags = IORESOURCE_IRQ,
 	}
 };
@@ -381,6 +391,11 @@ static struct resource bfin_spi2_resource[] = {
 	[1] = {
 		.start = CH_SPI2,
 		.end   = CH_SPI2,
+		.flags = IORESOURCE_DMA,
+	},
+	[2] = {
+		.start = IRQ_SPI2,
+		.end   = IRQ_SPI2,
 		.flags = IORESOURCE_IRQ,
 	}
 };
@@ -405,7 +420,7 @@ static struct platform_device bf538_spi_master0 = {
 static struct bfin5xx_spi_master bf538_spi_master_info1 = {
 	.num_chipselect = 8,
 	.enable_dma = 1,  /* master has the ability to do dma transfer */
-	.pin_req = {P_SPI1_SCK, P_SPI1_MISO, P_SPI1_MOSI, 0},
+	.pin_req = {/* P_SPI1_SCK, P_SPI1_MISO, P_SPI1_MOSI, */ 0},
 };
 
 static struct platform_device bf538_spi_master1 = {
@@ -421,7 +436,7 @@ static struct platform_device bf538_spi_master1 = {
 static struct bfin5xx_spi_master bf538_spi_master_info2 = {
 	.num_chipselect = 8,
 	.enable_dma = 1,  /* master has the ability to do dma transfer */
-	.pin_req = {P_SPI2_SCK, P_SPI2_MISO, P_SPI2_MOSI, 0},
+	.pin_req = {/* P_SPI2_SCK, P_SPI2_MISO, P_SPI2_MOSI, */ 0},
 };
 
 static struct platform_device bf538_spi_master2 = {

@@ -1240,6 +1240,9 @@ static int bfin_spi_setup(struct spi_device *spi)
 
  error:
 	if (ret) {
+		if (!chip)
+			return ret;
+
 		if (drv_data->dma_requested)
 			free_dma(drv_data->dma_channel);
 		drv_data->dma_requested = 0;

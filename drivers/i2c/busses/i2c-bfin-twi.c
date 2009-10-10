@@ -335,7 +335,7 @@ static int bfin_twi_do_master_xfer(struct i2c_adapter *adap,
 
 	while (!iface->result) {
 		if (!wait_for_completion_timeout(&iface->complete,
-			adap->timeout*HZ))
+			msecs_to_jiffies(adap->timeout * 10)))
 			iface->result = -1;
 	}
 
@@ -542,7 +542,7 @@ int bfin_twi_do_smbus_xfer(struct i2c_adapter *adap, u16 addr,
 
 	while (!iface->result) {
 		if (!wait_for_completion_timeout(&iface->complete,
-			adap->timeout*HZ))
+			msecs_to_jiffies(adap->timeout * 10)))
 			iface->result = -1;
 	}
 
@@ -669,7 +669,7 @@ static int i2c_bfin_twi_probe(struct platform_device *pdev)
 	p_adap->algo_data = iface;
 	p_adap->class = I2C_CLASS_ALL;
 	p_adap->dev.parent = &pdev->dev;
-	p_adap->timeout = 5;
+	p_adap->timeout = 500;
 	p_adap->retries = 3;
 
 	rc = peripheral_request_list(pin_req[pdev->id], "i2c-bfin-twi");

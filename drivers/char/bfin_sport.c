@@ -291,7 +291,7 @@ static irqreturn_t sport_rx_handler(int irq, void *dev_id)
 		while ((dev->rx_received < dev->rx_len) &&
 		       (dev->regs->stat & RXNE)) {
 			*(dev->rx_buf + dev->rx_received) =
-			    *(volatile unsigned char *)(&dev->regs->rx);
+			    *(volatile unsigned short *)(&dev->regs->rx);
 			dev->rx_received++;
 		}
 	} else if (word_bytes == 2) {
@@ -329,7 +329,7 @@ static inline void sport_tx_write(struct sport_dev *dev)
 
 	if (word_bytes == 1) {
 		while ((dev->tx_sent < dev->tx_len) && !(dev->regs->stat & TXF)) {
-			*(volatile unsigned char *)(&dev->regs->tx) =
+			*(volatile unsigned short *)(&dev->regs->tx) =
 			    *(dev->tx_buf + dev->tx_sent);
 			dev->tx_sent++;
 		}

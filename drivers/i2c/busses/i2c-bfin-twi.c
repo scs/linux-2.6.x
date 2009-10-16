@@ -87,6 +87,7 @@ static void bfin_twi_handle_interrupt(struct bfin_twi_iface *iface,
 	if (twi_int_status & XMTSERV) {
 		/* Transmit next data */
 		if (iface->writeNum > 0) {
+			SSYNC();
 			write_XMT_DATA8(iface, *(iface->transPtr++));
 			iface->writeNum--;
 		}
@@ -108,7 +109,6 @@ static void bfin_twi_handle_interrupt(struct bfin_twi_iface *iface,
 				write_MASTER_CTL(iface,
 					(read_MASTER_CTL(iface) | RSTART) & ~MDIR);
 		}
-		SSYNC();
 	}
 	if (twi_int_status & RCVSERV) {
 		if (iface->readNum > 0) {
@@ -130,7 +130,6 @@ static void bfin_twi_handle_interrupt(struct bfin_twi_iface *iface,
 		} else if (iface->manual_stop) {
 			write_MASTER_CTL(iface,
 				read_MASTER_CTL(iface) | STOP);
-			SSYNC();
 		} else if (iface->cur_mode == TWI_I2C_MODE_REPEAT &&
 		           iface->cur_msg + 1 < iface->msg_num) {
 			if (iface->pmsg[iface->cur_msg + 1].flags & I2C_M_RD)
@@ -139,14 +138,12 @@ static void bfin_twi_handle_interrupt(struct bfin_twi_iface *iface,
 			else
 				write_MASTER_CTL(iface,
 					(read_MASTER_CTL(iface) | RSTART) & ~MDIR);
-			SSYNC();
 		}
 	}
 	if (twi_int_status & MERR) {
 		write_INT_MASK(iface, 0);
 		write_MASTER_STAT(iface, 0x3e);
 		write_MASTER_CTL(iface, 0);
-		SSYNC();
 		iface->result = -EIO;
 		/* if both err and complete int stats are set, return proper
 		 * results.
@@ -185,7 +182,6 @@ static void bfin_twi_handle_interrupt(struct bfin_twi_iface *iface,
 			/* remove restart bit and enable master receive */
 			write_MASTER_CTL(iface,
 				read_MASTER_CTL(iface) & ~RSTART);
-			SSYNC();
 		} else if (iface->cur_mode == TWI_I2C_MODE_REPEAT &&
 				iface->cur_msg+1 < iface->msg_num) {
 			iface->cur_msg++;
@@ -204,7 +200,6 @@ static void bfin_twi_handle_interrupt(struct bfin_twi_iface *iface,
 					write_XMT_DATA8(iface,
 						*(iface->transPtr++));
 					iface->writeNum--;
-					SSYNC();
 				}
 			}
 
@@ -222,12 +217,10 @@ static void bfin_twi_handle_interrupt(struct bfin_twi_iface *iface,
 			/* remove restart bit and enable master receive */
 			write_MASTER_CTL(iface,
 				read_MASTER_CTL(iface) & ~RSTART);
-			SSYNC();
 		} else {
 			iface->result = 1;
 			write_INT_MASK(iface, 0);
 			write_MASTER_CTL(iface, 0);
-			SSYNC();
 		}
 	}
 	complete(&iface->complete);
@@ -247,8 +240,8 @@ static irqreturn_t bfin_twi_interrupt_entry(int irq, void *dev_id)
 			break;
 		/* Clear interrupt status */
 		write_INT_STAT(iface, twi_int_status);
-		SSYNC();
 		bfin_twi_handle_interrupt(iface, twi_int_status);
+		SSYNC();
 	}
 	spin_unlock_irqrestore(&iface->lock, flags);
 	return IRQ_HANDLED;

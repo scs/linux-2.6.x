@@ -8,7 +8,14 @@
  * Licensed under the GPL-2 or later.
  */
 
+/*
+ * Disable hardware checksum for bug #5600 if writeback cache is
+ * enabled. Otherwize, corrupted RX packet will be sent up stack
+ * without error mark.
+ */
+#ifndef CONFIG_BFIN_EXTMEM_WRITEBACK
 #define BFIN_MAC_CSUM_OFFLOAD
+#endif
 
 struct dma_descriptor {
 	struct dma_descriptor *next_dma_desc;

@@ -624,6 +624,10 @@ static int bfin_mac_hard_start_xmit(struct sk_buff *skb,
 {
 	u16 *data;
 	u32 data_align = (u32)(skb->data) & 0x3;
+
+	if (current_tx_ptr->next == tx_list_head)
+		return NETDEV_TX_BUSY;
+
 	current_tx_ptr->skb = skb;
 
 	if (data_align == 0x2) {

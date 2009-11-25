@@ -605,7 +605,6 @@ adjust_head:
 	do {
 		tx_list_head->desc_a.config &= ~DMAEN;
 		tx_list_head->status.status_word = 0;
-#ifndef CONFIG_BFIN_EXTMEM_WRITEBACK
 		if (tx_list_head->skb) {
 			dev_kfree_skb(tx_list_head->skb);
 			tx_list_head->skb = NULL;
@@ -613,7 +612,6 @@ adjust_head:
 			printk(KERN_ERR DRV_NAME
 			       ": no sk_buff in a transmitted frame!\n");
 		}
-#endif
 		tx_list_head = tx_list_head->next;
 	} while (tx_list_head->status.status_word != 0
 		 && current_tx_ptr != tx_list_head);
@@ -624,15 +622,12 @@ adjust_head:
 static int bfin_mac_hard_start_xmit(struct sk_buff *skb,
 				struct net_device *dev)
 {
-#ifndef CONFIG_BFIN_EXTMEM_WRITEBACK
 	u16 *data;
 	u32 data_align = (u32)(skb->data) & 0x3;
-#endif
 
 	if (current_tx_ptr->next == tx_list_head)
 		return NETDEV_TX_BUSY;
 
-#ifndef CONFIG_BFIN_EXTMEM_WRITEBACK
 	current_tx_ptr->skb = skb;
 
 	if (data_align == 0x2) {
@@ -644,7 +639,6 @@ static int bfin_mac_hard_start_xmit(struct sk_buff *skb,
 		blackfin_dcache_flush_range((u32)data,
 				(u32)((u8 *)data + skb->len + 4));
 	} else {
-#endif
 		*((u16 *)(current_tx_ptr->packet)) = (u16)(skb->len);
 		memcpy((u8 *)(current_tx_ptr->packet + 2), skb->data,
 			skb->len);
@@ -655,9 +649,7 @@ static int bfin_mac_hard_start_xmit(struct sk_buff *skb,
 		blackfin_dcache_flush_range(
 			(u32)current_tx_ptr->packet,
 			(u32)(current_tx_ptr->packet + skb->len + 2));
-#ifndef CONFIG_BFIN_EXTMEM_WRITEBACK
 	}
-#endif
 
 	/* Make sure the internal data buffer in the core are drained
 	 * so that the DMA descriptors are completely written when the
@@ -689,8 +681,6 @@ out:
 }
 
 #define ETH_FCS_LENGTH	4
-#define RX_ERROR_MASK (RX_LONG | RX_ALIGN | RX_CRC | RX_LEN | \
-	RX_FRAG | RX_ADDR | RX_DMAO | RX_PHY | RX_LATE | RX_RANGE)
 
 static void bfin_mac_rx(struct net_device *dev)
 {
@@ -700,15 +690,6 @@ static void bfin_mac_rx(struct net_device *dev)
 	unsigned int i;
 	unsigned char fcs[ETH_FCS_LENGTH + 1];
 #endif
-	/* check if frame status word reports an error condition
-	 * we which case we simply drop the packet
-	 */
-	if (current_rx_ptr->status.status_word & RX_ERROR_MASK) {
-		printk(KERN_NOTICE DRV_NAME
-		       ": rx: receive error - packet dropped\n");
-		dev->stats.rx_dropped++;
-		goto out;
-	}
 
 	/* allocate a new skb for next time receive */
 	skb = current_rx_ptr->skb;
@@ -762,10 +743,10 @@ static void bfin_mac_rx(struct net_device *dev)
 	netif_rx(skb);
 	dev->stats.rx_packets++;
 	dev->stats.rx_bytes += len;
-out:
 	current_rx_ptr->status.status_word = 0x00000000;
 	current_rx_ptr = current_rx_ptr->next;
 
+out:
 	return;
 }
 

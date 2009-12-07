@@ -13,7 +13,7 @@
  * enabled. Otherwize, corrupted RX packet will be sent up stack
  * without error mark.
  */
-#ifndef CONFIG_BFIN_EXTMEM_WRITEBACK
+#ifndef CONFIG_BFIN_WB
 #define BFIN_MAC_CSUM_OFFLOAD
 #endif
 

@@ -43,6 +43,8 @@
 #include <linux/interrupt.h>
 #include <linux/usb/sl811.h>
 #include <linux/usb/musb.h>
+#include <linux/leds.h>
+#include <linux/input.h>
 #include <asm/dma.h>
 #include <asm/bfin5xx_spi.h>
 #include <asm/reboot.h>
@@ -54,7 +56,11 @@
 /*
  * Name the Board for the /proc/cpuinfo
  */
+#ifdef CONFIG_BFIN527_EZKIT_V2
+const char bfin_board_name[] = "ADI BF527-EZKIT V2";
+#else
 const char bfin_board_name[] = "ADI BF527-EZKIT";
+#endif
 
 /*
  *  Driver needs to know address, irq and flag pin.
@@ -166,6 +172,32 @@ static struct platform_device bf52x_t350mcqb_device = {
 	.id		= -1,
 	.num_resources 	= ARRAY_SIZE(bf52x_t350mcqb_resources),
 	.resource 	= bf52x_t350mcqb_resources,
+};
+#endif
+
+#if defined(CONFIG_FB_BFIN_LQ035Q1) || defined(CONFIG_FB_BFIN_LQ035Q1_MODULE)
+#include <asm/bfin-lq035q1.h>
+
+static struct bfin_lq035q1fb_disp_info bfin_lq035q1_data = {
+	.mode = 	LQ035_NORM | LQ035_RGB | LQ035_RL | LQ035_TB,
+};
+
+static struct resource bfin_lq035q1_resources[] = {
+	{
+		.start = IRQ_PPI_ERROR,
+		.end = IRQ_PPI_ERROR,
+		.flags = IORESOURCE_IRQ,
+	},
+};
+
+static struct platform_device bfin_lq035q1_device = {
+	.name		= "bfin-lq035q1",
+	.id		= -1,
+	.num_resources 	= ARRAY_SIZE(bfin_lq035q1_resources),
+	.resource 	= bfin_lq035q1_resources,
+	.dev		= {
+		.platform_data = &bfin_lq035q1_data,
+	},
 };
 #endif
 
@@ -525,6 +557,13 @@ static struct bfin5xx_spi_chip spi_si3xxx_chip_info = {
 };
 #endif
 
+#if defined(CONFIG_FB_BFIN_LQ035Q1) || defined(CONFIG_FB_BFIN_LQ035Q1_MODULE)
+static struct bfin5xx_spi_chip lq035q1_spi_chip_info = {
+	.enable_dma	= 0,
+	.bits_per_word	= 8,
+};
+#endif
+
 #if defined(CONFIG_TOUCHSCREEN_AD7877) || defined(CONFIG_TOUCHSCREEN_AD7877_MODULE)
 static struct bfin5xx_spi_chip spi_ad7877_chip_info = {
 	.enable_dma = 0,
@@ -565,14 +604,6 @@ static const struct ad7879_platform_data bfin_ad7879_ts_info = {
 
 #if defined(CONFIG_TOUCHSCREEN_AD7879_SPI) || defined(CONFIG_TOUCHSCREEN_AD7879_SPI_MODULE)
 static struct bfin5xx_spi_chip spi_ad7879_chip_info = {
-	.enable_dma = 0,
-	.bits_per_word = 16,
-};
-#endif
-
-#if defined(CONFIG_SND_SOC_WM8731) || defined(CONFIG_SND_SOC_WM8731_MODULE) \
-	 && defined(CONFIG_SND_SOC_WM8731_SPI)
-static struct bfin5xx_spi_chip spi_wm8731_chip_info = {
 	.enable_dma = 0,
 	.bits_per_word = 16,
 };
@@ -683,17 +714,6 @@ static struct spi_board_info bfin_spi_board_info[] __initdata = {
 		.mode = SPI_CPHA | SPI_CPOL,
 	},
 #endif
-#if defined(CONFIG_SND_SOC_WM8731) || defined(CONFIG_SND_SOC_WM8731_MODULE) \
-	 && defined(CONFIG_SND_SOC_WM8731_SPI)
-	{
-		.modalias	= "wm8731",
-		.max_speed_hz	= 3125000,     /* max spi clock (SCK) speed in HZ */
-		.bus_num	= 0,
-		.chip_select    = 5,
-		.controller_data = &spi_wm8731_chip_info,
-		.mode = SPI_MODE_0,
-	},
-#endif
 #if defined(CONFIG_SPI_SPIDEV) || defined(CONFIG_SPI_SPIDEV_MODULE)
 	{
 		.modalias = "spidev",
@@ -701,6 +721,16 @@ static struct spi_board_info bfin_spi_board_info[] __initdata = {
 		.bus_num = 0,
 		.chip_select = 1,
 		.controller_data = &spidev_chip_info,
+	},
+#endif
+#if defined(CONFIG_FB_BFIN_LQ035Q1) || defined(CONFIG_FB_BFIN_LQ035Q1_MODULE)
+	{
+		.modalias = "bfin-lq035q1-spi",
+		.max_speed_hz = 20000000,     /* max spi clock (SCK) speed in HZ */
+		.bus_num = 0,
+		.chip_select = 7,
+		.controller_data = &lq035q1_spi_chip_info,
+		.mode = SPI_CPHA | SPI_CPOL,
 	},
 #endif
 };
@@ -737,12 +767,6 @@ static struct platform_device bfin_spi0_device = {
 	},
 };
 #endif  /* spi master and devices */
-
-#if defined(CONFIG_FB_BF537_LQ035) || defined(CONFIG_FB_BF537_LQ035_MODULE)
-static struct platform_device bfin_fb_device = {
-	.name = "bf537-lq035",
-};
-#endif
 
 #if defined(CONFIG_FB_BFIN_7393) || defined(CONFIG_FB_BFIN_7393_MODULE)
 static struct platform_device bfin_fb_adv7393_device = {
@@ -853,6 +877,84 @@ static struct platform_device i2c_bfin_twi_device = {
 };
 #endif
 
+#if defined(CONFIG_PMIC_ADP5520) || defined(CONFIG_PMIC_ADP5520_MODULE)
+#include <linux/mfd/adp5520.h>
+
+	/*
+	 *  ADP5520/5501 LEDs Data
+	 */
+
+static struct led_info adp5520_leds[] = {
+	{
+		.name = "adp5520-led1",
+		.default_trigger = "none",
+		.flags = FLAG_ID_ADP5520_LED1_ADP5501_LED0 | LED_OFFT_600ms,
+	},
+};
+
+static struct adp5520_leds_platfrom_data adp5520_leds_data = {
+	.num_leds = ARRAY_SIZE(adp5520_leds),
+	.leds = adp5520_leds,
+	.fade_in = FADE_T_600ms,
+	.fade_out = FADE_T_600ms,
+	.led_on_time = LED_ONT_600ms,
+};
+
+	/*
+	 *  ADP5520 Keypad Data
+	 */
+
+static const unsigned short adp5520_keymap[ADP5520_KEYMAPSIZE] = {
+	[KEY(3, 3)]	= KEY_1,
+	[KEY(2, 3)]	= KEY_2,
+	[KEY(1, 3)]	= KEY_3,
+	[KEY(0, 3)]	= KEY_UP,
+	[KEY(3, 2)]	= KEY_4,
+	[KEY(2, 2)]	= KEY_5,
+	[KEY(1, 2)]	= KEY_6,
+	[KEY(0, 2)]	= KEY_DOWN,
+	[KEY(3, 1)]	= KEY_7,
+	[KEY(2, 1)]	= KEY_8,
+	[KEY(1, 1)]	= KEY_9,
+	[KEY(0, 1)]	= KEY_DOT,
+	[KEY(3, 0)]	= KEY_BACKSPACE,
+	[KEY(2, 0)]	= KEY_0,
+	[KEY(1, 0)]	= KEY_HELP,
+	[KEY(0, 0)]	= KEY_ENTER,
+};
+
+static struct adp5520_keys_platfrom_data adp5520_keys_data = {
+	.rows_en_mask	= ROW_R3 | ROW_R2 | ROW_R1 | ROW_R0,
+	.cols_en_mask	= COL_C3 | COL_C2 | COL_C1 | COL_C0,
+	.keymap		= adp5520_keymap,
+	.keymapsize	= ARRAY_SIZE(adp5520_keymap),
+	.repeat		= 0,
+};
+
+	/*
+	 *  ADP5520/5501 Multifuction Device Init Data
+	 */
+
+static struct adp5520_subdev_info adp5520_subdevs[] = {
+	{
+		.name = "adp5520-led",
+		.id = ID_ADP5520,
+		.platform_data = &adp5520_leds_data,
+	},
+	{
+		.name = "adp5520-keys",
+		.id = ID_ADP5520,
+		.platform_data = &adp5520_keys_data,
+	},
+};
+
+static struct adp5520_platform_data adp5520_pdev_data = {
+	.num_subdevs = ARRAY_SIZE(adp5520_subdevs),
+	.subdevs = adp5520_subdevs,
+};
+
+#endif
+
 static struct i2c_board_info __initdata bfin_i2c_board_info[] = {
 #if defined(CONFIG_BFIN_TWI_LCD) || defined(CONFIG_BFIN_TWI_LCD_MODULE)
 	{
@@ -863,6 +965,20 @@ static struct i2c_board_info __initdata bfin_i2c_board_info[] = {
 	{
 		I2C_BOARD_INFO("pcf8574_keypad", 0x27),
 		.irq = IRQ_PF8,
+	},
+#endif
+#if defined(CONFIG_TOUCHSCREEN_AD7879_I2C) || defined(CONFIG_TOUCHSCREEN_AD7879_I2C_MODULE)
+	{
+		I2C_BOARD_INFO("ad7879", 0x2C),
+		.irq = IRQ_PF8,
+		.platform_data = (void *)&bfin_ad7879_ts_info,
+	},
+#endif
+#if defined(CONFIG_PMIC_ADP5520) || defined(CONFIG_PMIC_ADP5520_MODULE)
+	{
+		I2C_BOARD_INFO("pmic-adp5520", 0x32),
+		.irq = IRQ_PF9,
+		.platform_data = (void *)&adp5520_pdev_data,
 	},
 #endif
 };
@@ -880,7 +996,6 @@ static struct platform_device bfin_sport1_uart_device = {
 #endif
 
 #if defined(CONFIG_KEYBOARD_GPIO) || defined(CONFIG_KEYBOARD_GPIO_MODULE)
-#include <linux/input.h>
 #include <linux/gpio_keys.h>
 
 static struct gpio_keys_button bfin_gpio_keys_table[] = {
@@ -902,7 +1017,6 @@ static struct platform_device bfin_device_gpiokeys = {
 #endif
 
 #if defined(CONFIG_JOYSTICK_BFIN_ROTARY) || defined(CONFIG_JOYSTICK_BFIN_ROTARY_MODULE)
-#include <linux/input.h>
 #include <asm/bfin_rotary.h>
 
 static struct bfin_rotary_platform_data bfin_rotary_data = {
@@ -1021,12 +1135,14 @@ static struct platform_device *stamp_devices[] __initdata = {
 	&bfin_spi0_device,
 #endif
 
-#if defined(CONFIG_FB_BF537_LQ035) || defined(CONFIG_FB_BF537_LQ035_MODULE)
-	&bfin_fb_device,
+#ifdef CONFIG_BFIN527_EZKIT_V2
+#if defined(CONFIG_FB_BFIN_LQ035Q1) || defined(CONFIG_FB_BFIN_LQ035Q1_MODULE)
+	&bfin_lq035q1_device,
 #endif
-
+#else
 #if defined(CONFIG_FB_BFIN_T350MCQB) || defined(CONFIG_FB_BFIN_T350MCQB_MODULE)
 	&bf52x_t350mcqb_device,
+#endif
 #endif
 
 #if defined(CONFIG_FB_BFIN_7393) || defined(CONFIG_FB_BFIN_7393_MODULE)

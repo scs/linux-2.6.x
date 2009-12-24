@@ -1,7 +1,6 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.28.10
-# Thu May 21 05:50:01 2009
 #
 # CONFIG_MMU is not set
 # CONFIG_FPU is not set
@@ -200,6 +199,7 @@ CONFIG_IRQ_WATCH=13
 CONFIG_IRQ_PORTF_INTA=13
 CONFIG_IRQ_PORTF_INTB=13
 CONFIG_BFIN527_EZKIT=y
+# CONFIG_BFIN527_EZKIT_V2 is not set
 # CONFIG_BFIN527_BLUETECHNIX_CM is not set
 # CONFIG_BFIN526_EZBRD is not set
 
@@ -1156,9 +1156,7 @@ CONFIG_USB_MUSB_HOST=y
 # CONFIG_USB_MUSB_PERIPHERAL is not set
 # CONFIG_USB_MUSB_OTG is not set
 CONFIG_USB_MUSB_HDRC_HCD=y
-# CONFIG_MUSB_PIO_ONLY is not set
-CONFIG_USB_INVENTRA_DMA=y
-# CONFIG_USB_TI_CPPI_DMA is not set
+CONFIG_MUSB_PIO_ONLY=y
 # CONFIG_USB_MUSB_DEBUG is not set
 
 #

@@ -8,6 +8,18 @@ config BFIN537_STAMP
 	bool "BF537-STAMP"
 	help
 	  BF537-STAMP board support.
+	  
+config BFIN537_INDXCAM
+	bool "BF537-INDXCAM"
+	depends on (BF537)
+	help
+	  Support for indXcam intelligent camera.
+
+config BFIN537_LEANXCAM
+	bool "BF537-LEANXCAM"
+	depends on (BF537)
+	help
+	  Support for leanXcam intelligent camera.
 
 config BFIN537_BLUETECHNIX_CM_E
 	bool "Bluetechnix CM-BF537E"

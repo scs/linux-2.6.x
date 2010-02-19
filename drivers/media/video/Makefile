@@ -56,6 +56,7 @@ obj-$(CONFIG_VIDEO_ZORAN) += zoran/
 
 obj-$(CONFIG_VIDEO_BLACKFIN_MT9M001) += blackfin/
 obj-$(CONFIG_VIDEO_BLACKFIN_CAM) += blackfin/
+obj-$(CONFIG_VIDEO_MT9V032_OSCAR) += blackfin/
 
 obj-$(CONFIG_VIDEO_PMS) += pms.o
 obj-$(CONFIG_VIDEO_VINO) += vino.o indycam.o

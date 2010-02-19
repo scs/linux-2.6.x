@@ -19,6 +19,22 @@ config VIDEO_BLACKFIN_CAM_PPI1
 	  the single PPI on other Blackfin processors.  By default, PP0 is used.
 	  Select this option if you wish to use PPI1 instead.
 
+config VIDEO_MT9V032_OSCAR
+	tristate "Micron MT9V032 Camera driver used by OSCAR framework"
+	depends on BLACKFIN && I2C
+	default n
+	help
+	  Support for the Micron MT9V032 camera attached to
+	  the Blackfin PPI. Although the API is very similar,
+	  this driver is not compatible to video4linux but instead
+	  implements functionality not provided by video4linux.
+
+	  The SCS Open-Source Camera (OSCAR) framework for leanXcam
+	  and derived products depend on this driver.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called mt9v032.
+
 comment "CMOS Camera Sensor Selection"
 
 choice

@@ -107,6 +107,7 @@ obj-$(CONFIG_GPIO_VR41XX)	+= vr41xx_giu.o
 obj-$(CONFIG_GPIO_TB0219)	+= tb0219.o
 obj-$(CONFIG_TELCLOCK)		+= tlclk.o
 obj-$(CONFIG_SIMPLE_GPIO)	+= simple-gpio.o
+obj-$(CONFIG_BFIN_AMC)          += bfin_amc.o
 
 obj-$(CONFIG_CAN4LINUX)		+= can4linux/
 obj-$(CONFIG_MWAVE)		+= mwave/

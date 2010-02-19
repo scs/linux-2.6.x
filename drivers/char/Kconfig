@@ -28,6 +28,14 @@ config BFIN_DMA_INTERFACE
 
 	  To compile this driver as a module, choose M here: the module
 	  will be called bfin-dma.
+	  
+config BFIN_AMC
+	bool "Blackfin General Purpose AMC char device interface"
+	depends on BLACKFIN
+	default n
+	help
+	 Install a char driver that allows memory mapping to AMC space
+	 for user applications.
 
 config BFIN_PPI
 	tristate "Blackfin Generic PPI Driver"

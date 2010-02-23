@@ -143,15 +143,10 @@ static struct mtd_partition bfin_spi_bootflash_partitions[] = {
 		.offset = 0x00024000,
 		.mask_flags = 0
 	}, {
-		.name = "linux, 3.3M",
-		.size =   0x0034E000,
+		.name = "linux, 4M",
+		.size =   0x003d8000,
 		.offset = 0x00028000,
 		.mask_flags = 0
-        }, {
-                .name = "sensor calibration, 712k",
-                .size =   0x000b2000,
-                .offset = 0x0034e000,
-                .mask_flags = 0
         }
 };
 

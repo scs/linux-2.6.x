@@ -1062,6 +1062,7 @@ static int oscCam_setFrameBuffer(struct frame_buffer * fbuf)
 	oscCam_dev->buffer[fbuf->id].data = fbuf->data;
 	oscCam_dev->buffer[fbuf->id].state = FRAME_UNUSED;
 	oscCam_dev->buffer[fbuf->id].size = fbuf->size;
+	oscCam_dev->buffer[fbuf->id].flags = fbuf->flags;
 
 	return 0;	   
 }

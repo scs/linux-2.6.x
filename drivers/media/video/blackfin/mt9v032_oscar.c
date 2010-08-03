@@ -364,7 +364,7 @@ static void oscCam_regReset(struct ppi_device_t *pdev)
 	bfin_write_PPI_FRAME(pdev->lines_per_frame);
 }
 
-// Configures the DMA to write <count> byters into the DMA <buf> and starts
+// Configures the DMA to write <count> bytes into the DMA <buf> and starts
 // both the DMA and PPI.
 // Depending on whether nonblock has been set in the <ppidev> it then waits
 // until the data has arrived and wakes up any waiting processes, or just exits
@@ -490,14 +490,6 @@ static irqreturn_t ppifcd_irq(int irq, void *dev_id)
 	// We just finished capturing this frame so we update the pointer to the last image
 	oscCam_dev->last_image.fbuf = oscCam_dev->dma_buf->data;
 	memcpy(&oscCam_dev->last_image.window, &oscCam_dev->capt_win, sizeof(struct capture_window));  
-
-	if(oscCam_dev->dma_buf->flags & FB_FLAG_CACHED) {
-		// This frame buffer is in a cached memory region and therefore
-		// we must invalidate the cache since the data was transferred
-		// by the DMA and not by the CPU
-		blackfin_dcache_invalidate_range((u_long) oscCam_dev->dma_buf->data,
-						 (u_long)(oscCam_dev->dma_buf->data + oscCam_dev->size));
-	}
 
 	// Update the buffer pointers
 	oscCam_dev->ready_buf = oscCam_dev->dma_buf;
@@ -1164,6 +1156,19 @@ static int oscCam_capture(struct capture_param * cp)
 		return -EBUSY;
 	}
 
+	/////////// Invalidate cache /////////
+	BUG_ON(oscCam_dev->dma_buf != NULL);
+	oscCam_dev->dma_buf = &oscCam_dev->buffer[i];
+
+	if(oscCam_dev->dma_buf->flags & FB_FLAG_CACHED) {
+	  // This frame buffer is in a cached memory region and therefore
+	  // we must invalidate the cache since the data was transferred
+	  // by the DMA and not by the CPU
+	  blackfin_dcache_invalidate_range((u_long) oscCam_dev->dma_buf->data,
+					   (u_long)(oscCam_dev->dma_buf->data + oscCam_dev->size));
+	}
+
+
 	/////////// Configure PPI ///////////
 	oscCam_dev->ppidev->pixel_per_line = oscCam_dev->capt_win.width;
 	oscCam_dev->ppidev->lines_per_frame = oscCam_dev->capt_win.height;
@@ -1172,7 +1177,6 @@ static int oscCam_capture(struct capture_param * cp)
 //	bfin_write_PPI_CONTROL(oscCam_dev->ppidev->ppi_control & ~PORT_EN);
 
 	// Enable PPI interrupts
-	BUG_ON(oscCam_dev->dma_buf != NULL);
 //	bfin_write_SIC_IMASK(bfin_read_SIC_IMASK() | INTERRUPT_MASK); 
 //	enable_irq(IRQ_PPI_ERROR);
 
@@ -1225,8 +1229,6 @@ static int oscCam_capture(struct capture_param * cp)
 
 	////////////// Enable transfer ///////////////
 	oscCam_dev->ppidev->trigger_mode = cp->trigger_mode;
-
-	oscCam_dev->dma_buf = &oscCam_dev->buffer[i];
 	oscCam_dev->dma_buf->state = FRAME_GRABBING;
 
 	pr_debug("%s: Grabbing frame %d [0x%p]\n", 
